@@ -37,3 +37,24 @@ html body #page-header #nav {
   animation: none !important;
   will-change: auto;
 }
+
+#article-container img:not(.emoji) {
+  width: auto;
+  max-width: min(100%, 500px);
+  height: auto;
+}
+
+#article-container img.img-full {
+  width: 100%;
+  max-width: 100%;
+}
+
+#article-container img.img-half {
+  width: 50%;
+  max-width: 100%;
+}
+
+#article-container img.img-500 {
+  width: 500px;
+  max-width: 100%;
+}
