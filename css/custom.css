@@ -8,3 +8,15 @@ samp,
 pre {
   font-family: Menlo, Monaco, Consolas, "PingFang SC", "Microsoft YaHei", monospace !important;
 }
+
+*::selection {
+  background: #b9d4b1;
+  color: #183c25;
+  text-shadow: none;
+}
+
+*::-moz-selection {
+  background: #b9d4b1;
+  color: #183c25;
+  text-shadow: none;
+}
