@@ -2589,8 +2589,8 @@ figure.highlight pre .javascript .function {
   gap: 36px;
   overflow: hidden;
   margin-bottom: 22px;
-  padding: 38px 40px;
-  min-height: 224px;
+  padding: 28px 34px;
+  min-height: 176px;
   border: 1px solid rgba(255,255,255,0.68);
   border-left: 6px solid #4f8a63;
   background: rgba(255,255,255,0.92);
