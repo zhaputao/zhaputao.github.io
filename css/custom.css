@@ -32,10 +32,27 @@ html body #page-header #nav {
   left: 0 !important;
   z-index: 1000;
   width: 100%;
+  opacity: 1 !important;
+  visibility: visible !important;
   transform: translate3d(0, 0, 0) !important;
   transition: none !important;
   animation: none !important;
   will-change: auto;
+}
+
+html body #page-header.nav-fixed #nav,
+html body #page-header.fixed #nav {
+  top: 0 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.shuoshuo-navigation .shuoshuo-page-info {
+  color: #315b4a;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .shuoshuo-navigation .shuoshuo-page-info {
+  color: #d7e4dc;
 }
 
 #article-container img:not(.emoji) {

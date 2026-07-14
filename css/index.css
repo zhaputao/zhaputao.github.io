@@ -3602,8 +3602,9 @@ figure.highlight pre .javascript .function {
 }
 .shuoshuo-navigation .shuoshuo-page-info {
   margin: 0 15px;
-  color: #858585;
+  color: #315b4a;
   white-space: nowrap;
+  font-weight: 600;
   font-size: 0.9em;
 }
 .shuoshuo-navigation .shuoshuo-page-input {
@@ -3754,6 +3755,9 @@ figure.highlight pre .javascript .function {
     -ms-transform: translateX(2px);
     transform: translateX(2px);
   }
+}
+[data-theme='dark'] .shuoshuo-navigation .shuoshuo-page-info {
+  color: #d7e4dc;
 }
 .tag-cloud-list {
   -webkit-animation: tagsFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
