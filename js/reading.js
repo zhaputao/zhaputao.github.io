@@ -29,7 +29,7 @@
 
   const renderStats = data => {
     const summary = data.summary || {};
-    const visibleBookCount = (data.books || []).filter(book => book.cover).slice(0, 10).length;
+    const visibleBookCount = (data.books || []).filter(book => book.cover).slice(0, 9).length;
     const cards = [
       [visibleBookCount, '公开书架'],
       [summary.finishedCount || 0, '已读完'],
@@ -84,7 +84,7 @@
       ? booksWithCovers.filter(book => book.status === 'finished')
       : filter === 'reading'
         ? booksWithCovers.filter(book => book.status === 'reading').slice(0, 9)
-        : booksWithCovers.slice(0, 10);
+        : booksWithCovers.slice(0, 9);
     const target = document.querySelector('#reading-books');
     if (!books.length) {
       target.innerHTML = empty(filter === 'all' ? '暂无公开书架数据' : '这个分类还没有书');
