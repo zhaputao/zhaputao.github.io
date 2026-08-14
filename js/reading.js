@@ -17,12 +17,21 @@
     }).replaceAll('/', '-');
   };
 
+  const formatCompactDuration = seconds => {
+    const value = Math.max(0, Number(seconds) || 0);
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor((value % 3600) / 60);
+    if (hours) return `${hours}时${minutes ? `${minutes}分` : ''}`;
+    return `${minutes}分`;
+  };
+
   const empty = message => `<div class="reading-inline-empty">${escapeHTML(message)}</div>`;
 
   const renderStats = data => {
     const summary = data.summary || {};
+    const visibleBookCount = (data.books || []).filter(book => book.cover).slice(0, 10).length;
     const cards = [
-      [summary.shelfCount || data.books.length, '公开书架'],
+      [visibleBookCount, '公开书架'],
       [summary.finishedCount || 0, '已读完'],
       [formatDuration(summary.yearReadTime), `${data.year} 年阅读`],
       [summary.yearReadDays || 0, `${data.year} 年阅读天数`]
@@ -33,12 +42,22 @@
   };
 
   const renderMonths = data => {
-    const values = Array.from({ length: 12 }, (_, index) => Number(data.monthlyReadTimes?.[index]) || 0);
+    const labels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const values = Array.from({ length: 7 }, (_, index) => Number(data.weekdayReadTimes?.[index]) || 0);
     const max = Math.max(...values, 1);
+    const rangeTarget = document.querySelector('#reading-week-range');
+    if (rangeTarget) {
+      const start = data.weekStart ? new Date(Number(data.weekStart) * 1000) : null;
+      const end = start ? new Date(start.getTime() + 6 * 86400000) : null;
+      rangeTarget.textContent = start && end
+        ? `${start.getMonth() + 1}.${start.getDate()} — ${end.getMonth() + 1}.${end.getDate()}`
+        : '';
+    }
     document.querySelector('#reading-months').innerHTML = values.map((seconds, index) => `
-      <div class="reading-month" title="${index + 1}月：${formatDuration(seconds)}">
-        <div class="reading-month-bar" style="height:${Math.max(3, Math.round(seconds / max * 150))}px"></div>
-        <span class="reading-month-label">${index + 1}</span>
+      <div class="reading-month" title="${labels[index]}：${formatDuration(seconds)}">
+        <span class="reading-month-value">${formatCompactDuration(seconds)}</span>
+        <div class="reading-month-bar" style="height:${Math.max(3, Math.round(seconds / max * 70))}px"></div>
+        <span class="reading-month-label">${labels[index]}</span>
       </div>
     `).join('');
   };
@@ -60,7 +79,12 @@
   };
 
   const renderBooks = (data, filter = 'all') => {
-    const books = (data.books || []).filter(book => filter === 'all' || book.status === filter);
+    const booksWithCovers = (data.books || []).filter(book => book.cover);
+    const books = filter === 'finished'
+      ? booksWithCovers.filter(book => book.status === 'finished')
+      : filter === 'reading'
+        ? booksWithCovers.filter(book => book.status === 'reading').slice(0, 9)
+        : booksWithCovers.slice(0, 10);
     const target = document.querySelector('#reading-books');
     if (!books.length) {
       target.innerHTML = empty(filter === 'all' ? '暂无公开书架数据' : '这个分类还没有书');
@@ -82,7 +106,7 @@
   };
 
   const renderHighlights = data => {
-    const highlights = data.highlights || [];
+    const highlights = (data.highlights || []).slice(0, 10);
     document.querySelector('#reading-highlight-count').textContent = highlights.length ? `${highlights.length} 条公开摘录` : '';
     const target = document.querySelector('#reading-highlights');
     if (!highlights.length) {
@@ -98,6 +122,28 @@
         </div>
       </article>
     `).join('');
+  };
+
+  const setupHighlightScroller = () => {
+    const target = document.querySelector('#reading-highlights');
+    const cards = [...(target?.querySelectorAll('.reading-highlight') || [])];
+    clearInterval(window.readingHighlightTimer);
+    if (!target || cards.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let index = 0;
+    let paused = false;
+    const setPaused = value => { paused = value; };
+    target.addEventListener('pointerenter', () => setPaused(true));
+    target.addEventListener('pointerleave', () => setPaused(false));
+    target.addEventListener('focusin', () => setPaused(true));
+    target.addEventListener('focusout', () => setPaused(false));
+    window.readingHighlightTimer = setInterval(() => {
+      if (paused) return;
+      index = (index + 1) % cards.length;
+      target.scrollTo({
+        top: index === 0 ? 0 : cards[index].offsetTop - target.offsetTop,
+        behavior: 'smooth'
+      });
+    }, 5000);
   };
 
   const init = async () => {
@@ -118,6 +164,7 @@
       renderCategories(data);
       renderBooks(data);
       renderHighlights(data);
+      setupHighlightScroller();
       document.querySelector('#reading-empty').hidden = Boolean(hasData);
       document.querySelectorAll('[data-reading-filter]').forEach(button => {
         button.addEventListener('click', () => {
