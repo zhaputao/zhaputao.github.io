@@ -87,14 +87,14 @@
       return;
     }
     const palette = ['#344b43', '#747953', '#943f35', '#344b65', '#8b6a4b', '#645367', '#a18d70', '#475959'];
-    const perRow = Math.max(3, Math.floor((target.clientWidth - 32) / 48));
+    const perRow = Math.max(3, Math.floor((target.clientWidth - 32) / 40));
     const rows = [];
     for (let offset = 0; offset < books.length; offset += perRow) {
       rows.push(`<div class="reading-shelf-row">${books.slice(offset, offset + perRow).map((book, index) => {
         const seed = [...String(book.bookId || book.title)].reduce((sum, c) => (sum * 31 + c.charCodeAt(0)) >>> 0, 0);
         const title = escapeHTML(book.title);
         const status = book.kind === 'audio' ? '有声书' : book.status === 'finished' ? '已读完' : '正在读';
-        return `<article class="reading-book${index >= perRow - 3 ? ' reading-book-end' : ''}" style="--spine-color:${palette[seed % palette.length]};--book-height:${178 + seed % 44}px">
+        return `<article class="reading-book${index >= perRow - 3 ? ' reading-book-end' : ''}" style="--spine-color:${palette[seed % palette.length]};--book-height:${142 + seed % 36}px">
           <button type="button" class="reading-book-spine" aria-label="查看《${title}》封面，${status}" aria-expanded="false">
             <span class="reading-spine-title">${title}</span><span class="reading-spine-author">${escapeHTML(book.author || '佚名')}</span><i class="reading-spine-dot${book.status === 'finished' ? ' is-finished' : ''}"></i>
           </button>
@@ -153,7 +153,7 @@
   };
 
   const renderHighlights = data => {
-    const highlights = (data.highlights || []).slice(0, 10);
+    const highlights = (data.highlights || []).slice(0, 15);
     document.querySelector('#reading-highlight-count').textContent = highlights.length ? `${highlights.length} 条公开摘录` : '';
     const target = document.querySelector('#reading-highlights');
     if (!highlights.length) {

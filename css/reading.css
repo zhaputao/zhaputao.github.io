@@ -1,13 +1,14 @@
 .type-reading #content-inner {
   width: 100%;
-  max-width: 1760px;
+  max-width: 1240px;
   padding-right: 14px;
   padding-left: 14px;
 }
 
 .type-reading #page {
-  width: min(1720px, calc(100vw - 28px));
-  max-width: 1720px;
+  width: min(1200px, 84vw);
+  max-width: 1200px;
+  margin-inline: auto;
   padding: 0;
   background: transparent;
   border: 0;
@@ -35,53 +36,58 @@
 
 .reading-hero {
   position: relative;
-  display: grid;
-  place-content: center;
-  min-height: clamp(170px, 23vh, 260px);
-  padding: 38px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 166px;
+  padding: 28px 48px;
   overflow: hidden;
-  text-align: center;
-  background:
-    radial-gradient(circle at 15% 110%, rgba(176, 197, 181, 0.26), transparent 34%),
-    radial-gradient(circle at 88% -15%, rgba(218, 205, 174, 0.28), transparent 38%),
-    rgba(251, 248, 241, 0.76);
+  background: linear-gradient(110deg, rgba(255,253,246,.94), rgba(244,242,229,.74));
   border: 1px solid var(--reading-line);
-  border-radius: 22px;
-  box-shadow: 0 14px 36px rgba(54, 47, 36, 0.08);
+  border-radius: 4px 18px 18px 4px;
+  box-shadow: 0 10px 28px rgba(54,47,36,.07);
 }
-
-.reading-hero::before,
+.reading-hero::before {
+  position: absolute;
+  top: 0;
+  left: 22px;
+  width: 10px;
+  height: 52px;
+  content: "";
+  background: var(--reading-green);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%);
+  opacity: .75;
+}
 .reading-hero::after {
   position: absolute;
-  width: 1px;
-  height: 110px;
+  right: 36px;
+  top: 24px;
+  bottom: 24px;
+  width: 52px;
   content: "";
-  background: linear-gradient(transparent, rgba(70, 105, 87, 0.35), transparent);
+  border-left: 1px solid var(--reading-line);
+  border-right: 1px solid var(--reading-line);
+  transform: skewY(-12deg);
+  box-shadow: 8px 0 0 -7px rgba(70,105,87,.25), 16px 0 0 -15px rgba(70,105,87,.2);
 }
-
-.reading-hero::before {
-  top: 12%;
-  left: 11%;
-  transform: rotate(36deg);
+.reading-hero-label {
+  margin: 0 0 12px;
+  color: var(--reading-green);
+  font-size: 9px;
+  letter-spacing: .26em;
 }
-
-.reading-hero::after {
-  right: 12%;
-  bottom: 9%;
-  transform: rotate(36deg);
-}
-
 .reading-hero h1 {
   position: relative;
   z-index: 1;
-  max-width: 920px;
   margin: 0;
+  padding-right: 50px;
   color: var(--reading-ink);
-  font-family: "Noto Serif SC", "Songti SC", serif;
-  font-size: clamp(2rem, 4.5vw, 4.1rem);
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: 0.08em;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Noto Serif SC", serif;
+  font-size: clamp(1.7rem, 2.8vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: .1em;
 }
 
 .reading-updated {
@@ -95,11 +101,11 @@
 
 .reading-room {
   display: grid;
-  grid-template-columns: minmax(270px, 300px) minmax(0, 1fr) minmax(270px, 300px);
+  grid-template-columns: 190px minmax(0, 1fr) 200px;
   align-items: start;
-  gap: 18px;
-  min-height: 760px;
-  margin-top: 18px;
+  gap: 14px;
+  min-height: 600px;
+  margin-top: 14px;
 }
 
 .reading-stats-column,
@@ -109,7 +115,7 @@
 
 .reading-shelf-column {
   min-width: 0;
-  padding: 40px 30px 54px;
+  padding: 26px 20px 36px;
   background: rgba(255, 253, 248, 0.88);
   border: 1px solid var(--reading-line);
   border-radius: 18px;
@@ -119,7 +125,7 @@
 .reading-stats-column > .reading-column-heading,
 .reading-highlights-column > .reading-column-heading,
 .reading-panel {
-  padding: 24px;
+  padding: 18px;
   background: rgba(255, 253, 248, 0.88);
   border: 1px solid var(--reading-line);
   border-radius: 16px;
@@ -171,7 +177,7 @@
   margin: 0;
   color: var(--reading-ink);
   font-family: "Noto Serif SC", "Songti SC", serif;
-  font-size: clamp(1.3rem, 2vw, 1.75rem);
+  font-size: clamp(1.15rem, 1.5vw, 1.4rem);
   font-weight: 700;
 }
 
@@ -194,7 +200,7 @@
   min-height: 0;
   flex-direction: column;
   justify-content: center;
-  padding: 14px 12px;
+  padding: 14px 8px;
   background: rgba(255, 253, 248, 0.9);
   border: 1px solid var(--reading-line);
   border-radius: 15px;
@@ -205,7 +211,7 @@
   display: block;
   color: var(--reading-green-deep);
   font-family: "Noto Serif SC", "Songti SC", serif;
-  font-size: clamp(0.96rem, 1.35vw, 1.3rem);
+  font-size: clamp(0.82rem, 1vw, 1rem);
   line-height: 1.15;
   white-space: nowrap;
 }
@@ -244,9 +250,9 @@
 
 .reading-months {
   display: grid;
-  grid-template-columns: repeat(7, minmax(16px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   align-items: end;
-  gap: 7px;
+  gap: 4px;
   height: 112px;
 }
 
@@ -276,6 +282,7 @@
 }
 
 .reading-month-label {
+  white-space: nowrap;
   color: var(--reading-muted);
   font-size: 0.55rem;
 }
@@ -337,11 +344,11 @@
 /* Books stand on individual shelves; previews float without moving their neighbours. */
 .reading-shelf-note { display: flex; justify-content: space-between; gap: 12px; color: var(--reading-muted); font-size: .65rem; margin: -8px 0 18px; }
 .reading-books { display: grid; gap: 0; border: 8px solid #a88b68; border-top: 0; border-radius: 4px; background: #eae4d8; }
-.reading-shelf-row { display: flex; align-items: flex-end; gap: 5px; position: relative; min-height: 256px; padding: 24px 16px 0; border-bottom: 17px solid #b2936f; background: linear-gradient(180deg, rgba(71,52,32,.16), transparent 30%), repeating-linear-gradient(90deg, #ede8df 0, #e8e2d7 16px, #eee9e0 34px); box-shadow: inset 7px 0 12px #69513824, 0 6px 9px #4d392d20; }
+.reading-shelf-row { display: flex; align-items: flex-end; gap: 5px; position: relative; min-height: 204px; padding: 24px 16px 0; border-bottom: 17px solid #b2936f; background: linear-gradient(180deg, rgba(71,52,32,.16), transparent 30%), repeating-linear-gradient(90deg, #ede8df 0, #e8e2d7 16px, #eee9e0 34px); box-shadow: inset 7px 0 12px #69513824, 0 6px 9px #4d392d20; }
 .reading-shelf-row::after { content: ''; position: absolute; bottom: -17px; left: -1px; right: -1px; height: 17px; background: linear-gradient(#d4b996, #b69a76 45%, #987857); box-shadow: 0 6px 9px #4d392d24; }
-.reading-book { position: relative; flex: 0 0 43px; height: var(--book-height); min-width: 0; perspective: 900px; }
-.reading-book-spine { display: flex; align-items: center; gap: 10px; width: 100%; height: 100%; padding: 15px 7px 21px; border: 0; border-radius: 3px 4px 1px 1px; background: linear-gradient(90deg, #0005, #fff2 12%, transparent 24%, transparent 76%, #0004), var(--spine-color); color: #fff7e6; box-shadow: 3px 0 4px #2d27194a, inset 0 3px 2px #ffffff42; cursor: pointer; transition: transform .25s ease; }
-.reading-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 14px; line-height: 1.15; max-height: 100%; overflow: hidden; letter-spacing: 1px; }
+.reading-book { position: relative; flex: 0 0 35px; height: var(--book-height); min-width: 0; perspective: 900px; }
+.reading-book-spine { display: flex; align-items: center; gap: 5px; width: 100%; height: 100%; padding: 15px 7px 21px; border: 0; border-radius: 3px 4px 1px 1px; background: linear-gradient(90deg, #0005, #fff2 12%, transparent 24%, transparent 76%, #0004), var(--spine-color); color: #fff7e6; box-shadow: 3px 0 4px #2d27194a, inset 0 3px 2px #ffffff42; cursor: pointer; transition: transform .25s ease; }
+.reading-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 12px; line-height: 1.15; max-height: 100%; overflow: hidden; letter-spacing: 1px; }
 .reading-spine-author { writing-mode: vertical-rl; max-height: 100%; overflow: hidden; font-size: 8px; opacity: .72; line-height: 1; }
 .reading-spine-dot { position: absolute; bottom: 9px; left: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: #dfc59a; }
 .reading-spine-dot.is-finished { background: #9bd4bc; }
@@ -404,7 +411,7 @@
 
 .reading-highlight {
   position: relative;
-  padding: 20px 18px 18px 22px;
+  padding: 16px 14px 14px 17px;
   background: rgba(255, 253, 248, 0.72);
   border: 1px solid var(--reading-line);
   border-radius: 4px 14px 14px 4px;
@@ -431,7 +438,7 @@
   background: transparent;
   border: 0;
   font-family: "Noto Serif SC", "Songti SC", serif;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   line-height: 1.8;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 5;
@@ -505,7 +512,7 @@
 
 @media (max-width: 1100px) {
   .reading-room {
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: 190px minmax(0, 1fr);
   }
 
   .reading-highlights-column {
@@ -525,8 +532,8 @@
   }
 
   .reading-hero {
-    min-height: 190px;
-    padding: 30px 20px;
+    min-height: 158px;
+    padding: 24px 28px 24px 40px;
   }
 
   .reading-room {
@@ -564,13 +571,16 @@
 
 @media (max-width: 520px) {
   .reading-hero h1 {
-    font-size: 1.72rem;
+    font-size: 1.6rem;
+    padding-right: 0;
   }
 
   .reading-column-heading.reading-heading-wrap {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .reading-hero::after { display: none; }
 
   .reading-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
