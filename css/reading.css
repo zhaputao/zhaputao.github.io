@@ -594,3 +594,11 @@
   .reading-timeline-grid { gap: 16px 7px; }
 
 }
+
+/* Collapse complete shelf rows so covers on the third shelf can still open freely. */
+.reading-shelf-row[hidden], #reading-more[hidden] { display: none; }
+.reading-more-wrap { display: flex; justify-content: center; margin-top: 22px; }
+.reading-more-wrap:has([hidden]) { display: none; }
+#reading-more { min-width: 130px; padding: 9px 26px; border: 1px solid var(--reading-line); border-radius: 999px; background: var(--reading-card); color: var(--reading-green-deep); font: inherit; font-size: .75rem; cursor: pointer; }
+#reading-more:hover { background: var(--reading-green); color: var(--reading-card); }
+#reading-more:focus-visible { outline: 2px solid var(--reading-green); outline-offset: 4px; }

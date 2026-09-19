@@ -81,6 +81,13 @@
   const renderBooks = (data, filter = 'all') => {
     const books = (data.books || []).filter(book => filter === 'all' || book.status === filter);
     const target = document.querySelector('#reading-books');
+    const more = document.querySelector('#reading-more');
+    if (target.dataset.filter !== filter) {
+      target.dataset.expanded = 'false';
+      target.dataset.filter = filter;
+    }
+    more.hidden = true;
+    more.onclick = null;
     document.querySelector('#reading-book-count').textContent = `${books.length} 本书`;
     if (!books.length) {
       target.innerHTML = empty(filter === 'all' ? '暂无公开书架数据' : '这个分类还没有书');
@@ -106,6 +113,22 @@
       }).join('')}</div>`);
     }
     target.innerHTML = rows.join('');
+    const updateExpansion = () => {
+      const expanded = target.dataset.expanded === 'true';
+      target.querySelectorAll('.reading-shelf-row').forEach((row, index) => {
+        row.hidden = !expanded && index >= 3;
+      });
+      more.hidden = rows.length <= 3;
+      more.setAttribute('aria-expanded', String(expanded));
+      more.textContent = expanded ? '收起书架 ↑' : '更多 ↓';
+    };
+    more.onclick = () => {
+      const collapsing = target.dataset.expanded === 'true';
+      target.dataset.expanded = String(!collapsing);
+      updateExpansion();
+      if (collapsing) more.scrollIntoView({ block: 'nearest' });
+    };
+    updateExpansion();
     target.querySelectorAll('.reading-book-spine').forEach(button => {
       button.addEventListener('click', () => {
         const expanded = button.getAttribute('aria-expanded') !== 'true';
