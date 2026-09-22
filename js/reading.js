@@ -29,7 +29,7 @@
 
   const renderStats = data => {
     const summary = data.summary || {};
-    const visibleBookCount = (data.books || []).filter(book => book.cover).slice(0, 10).length;
+    const visibleBookCount = (data.books || []).length;
     const cards = [
       [visibleBookCount, '公开书架'],
       [summary.finishedCount || 0, '已读完'],
@@ -79,34 +79,104 @@
   };
 
   const renderBooks = (data, filter = 'all') => {
-    const booksWithCovers = (data.books || []).filter(book => book.cover);
-    const books = filter === 'finished'
-      ? booksWithCovers.filter(book => book.status === 'finished')
-      : filter === 'reading'
-        ? booksWithCovers.filter(book => book.status === 'reading').slice(0, 9)
-        : booksWithCovers.slice(0, 10);
+    const books = (data.books || []).filter(book => filter === 'all' || book.status === filter);
     const target = document.querySelector('#reading-books');
+    const more = document.querySelector('#reading-more');
+    if (target.dataset.filter !== filter) {
+      target.dataset.expanded = 'false';
+      target.dataset.filter = filter;
+    }
+    more.hidden = true;
+    more.onclick = null;
+    document.querySelector('#reading-book-count').textContent = `${books.length} 本书`;
     if (!books.length) {
       target.innerHTML = empty(filter === 'all' ? '暂无公开书架数据' : '这个分类还没有书');
       return;
     }
-    target.innerHTML = books.map(book => {
-      const content = `
-        <div class="reading-book-cover">
-          ${book.cover ? `<img src="${escapeHTML(book.cover)}" alt="${escapeHTML(book.title)}封面" loading="lazy">` : ''}
-          ${book.kind === 'audio' ? '<span class="reading-book-kind">听书</span>' : ''}
-          <span class="reading-book-status">${book.status === 'finished' ? '读完' : '在读'}</span>
-        </div>
-        <h3 class="reading-book-title" title="${escapeHTML(book.title)}">${escapeHTML(book.title)}</h3>
-        <p class="reading-book-author">${escapeHTML(book.author || '佚名')}</p>`;
-      return book.deepLink
-        ? `<a class="reading-book" href="${escapeHTML(book.deepLink)}" rel="noopener">${content}</a>`
-        : `<article class="reading-book">${content}</article>`;
+    const palette = ['#344b43', '#747953', '#943f35', '#344b65', '#8b6a4b', '#645367', '#a18d70', '#475959'];
+    const perRow = Math.max(3, Math.floor((target.clientWidth - 32) / 40));
+    const rows = [];
+    for (let offset = 0; offset < books.length; offset += perRow) {
+      rows.push(`<div class="reading-shelf-row">${books.slice(offset, offset + perRow).map((book, index) => {
+        const seed = [...String(book.bookId || book.title)].reduce((sum, c) => (sum * 31 + c.charCodeAt(0)) >>> 0, 0);
+        const title = escapeHTML(book.title);
+        const status = book.kind === 'audio' ? '有声书' : book.status === 'finished' ? '已读完' : '正在读';
+        return `<article class="reading-book${index >= perRow - 3 ? ' reading-book-end' : ''}" style="--spine-color:${palette[seed % palette.length]};--book-height:${142 + seed % 36}px">
+          <button type="button" class="reading-book-spine" aria-label="查看《${title}》封面，${status}" aria-expanded="false">
+            <span class="reading-spine-title">${title}</span><span class="reading-spine-author">${escapeHTML(book.author || '佚名')}</span><i class="reading-spine-dot${book.status === 'finished' ? ' is-finished' : ''}"></i>
+          </button>
+          <div class="reading-book-preview">
+            <div class="reading-book-cover">${book.cover ? `<img src="${escapeHTML(book.cover)}" alt="${title}封面" loading="lazy">` : `<span class="reading-cover-fallback">${title}</span>`}</div>
+            <div class="reading-book-caption"><strong>${title}</strong><span>${escapeHTML(book.author || '佚名')} · ${status}</span>${book.deepLink && /^(https?:|weread:)/i.test(book.deepLink) ? `<a href="${escapeHTML(book.deepLink)}" rel="noopener">打开阅读 ↗</a>` : ''}</div>
+          </div>
+        </article>`;
+      }).join('')}</div>`);
+    }
+    target.innerHTML = rows.join('');
+    const updateExpansion = () => {
+      const expanded = target.dataset.expanded === 'true';
+      target.querySelectorAll('.reading-shelf-row').forEach((row, index) => {
+        row.hidden = !expanded && index >= 3;
+      });
+      more.hidden = rows.length <= 3;
+      more.setAttribute('aria-expanded', String(expanded));
+      more.textContent = expanded ? '收起书架 ↑' : '更多 ↓';
+    };
+    more.onclick = () => {
+      const collapsing = target.dataset.expanded === 'true';
+      target.dataset.expanded = String(!collapsing);
+      updateExpansion();
+      if (collapsing) more.scrollIntoView({ block: 'nearest' });
+    };
+    updateExpansion();
+    target.querySelectorAll('.reading-book-spine').forEach(button => {
+      button.addEventListener('click', () => {
+        const expanded = button.getAttribute('aria-expanded') !== 'true';
+        target.querySelectorAll('.reading-book-spine').forEach(other => other.setAttribute('aria-expanded', 'false'));
+        button.setAttribute('aria-expanded', String(expanded));
+      });
+    });
+    target.querySelectorAll('img').forEach(img => img.addEventListener('error', () => {
+      const fallback = document.createElement('span');
+      fallback.className = 'reading-cover-fallback';
+      fallback.textContent = img.alt.replace(/封面$/, '');
+      img.replaceWith(fallback);
+    }));
+  };
+
+  const renderTimeline = data => {
+    const now = new Date();
+    const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Shanghai' }).format(now));
+    const month = Number(new Intl.DateTimeFormat('en', { month: 'numeric', timeZone: 'Asia/Shanghai' }).format(now));
+    const history = data.readingTimeline || [{ year: data.year, months: data.monthlyReadTimes }];
+    const years = [year - 2, year - 1, year];
+    const max = Math.max(1, ...history.filter(item => years.includes(item.year)).flatMap(item => item.months || []).filter(Number.isFinite));
+    const updated = data.generatedAt ? new Date(data.generatedAt) : null;
+    const syncedMonth = updated ? Number(new Intl.DateTimeFormat('en', { month: 'numeric', timeZone: 'Asia/Shanghai' }).format(updated)) : 0;
+    const syncedYear = updated ? Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Shanghai' }).format(updated)) : 0;
+    document.querySelector('#reading-timeline-range').textContent = `${years[0]} — ${year}`;
+    document.querySelector('#reading-timeline-grid').innerHTML = '<span></span>' + Array.from({ length: 12 }, (_, i) => `<span class="reading-timeline-month">${i + 1}月</span>`).join('') + years.map(value => {
+      const months = history.find(item => Number(item.year) === value)?.months;
+      return `<span class="reading-timeline-year">${value}</span>` + Array.from({ length: 12 }, (_, i) => {
+        const future = value === year && i + 1 > month;
+        const stale = value > syncedYear || (value === syncedYear && i + 1 > syncedMonth);
+        const seconds = months?.[i];
+        const missing = !Number.isFinite(seconds) || stale;
+        const label = `${value}年${i + 1}月：${future ? '尚未到来' : missing ? '尚未同步' : formatDuration(seconds)}`;
+        const level = future ? 'future' : missing ? 'missing' : seconds > 0 ? Math.max(1, Math.ceil(seconds / max * 4)) : 0;
+        return `<button type="button" class="reading-timeline-cell" data-level="${level}" aria-label="${label}" title="${label}"></button>`;
+      }).join('');
     }).join('');
+    document.querySelectorAll('.reading-timeline-cell').forEach(cell => {
+      const show = () => { document.querySelector('#reading-timeline-detail').textContent = cell.getAttribute('aria-label'); };
+      cell.addEventListener('pointerenter', show);
+      cell.addEventListener('focus', show);
+      cell.addEventListener('click', show);
+    });
   };
 
   const renderHighlights = data => {
-    const highlights = (data.highlights || []).slice(0, 10);
+    const highlights = (data.highlights || []).slice(0, 15);
     document.querySelector('#reading-highlight-count').textContent = highlights.length ? `${highlights.length} 条公开摘录` : '';
     const target = document.querySelector('#reading-highlights');
     if (!highlights.length) {
@@ -114,7 +184,7 @@
       return;
     }
     target.innerHTML = highlights.map(item => `
-      <article class="reading-highlight">
+      <article class="reading-highlight" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看《${escapeHTML(item.bookTitle)}》划线全文" title="点击查看完整划线">
         <blockquote>${escapeHTML(item.text)}</blockquote>
         <div class="reading-highlight-meta">
           <span><span class="reading-highlight-book">《${escapeHTML(item.bookTitle)}》</span>${item.chapter ? ` · ${escapeHTML(item.chapter)}` : ''}</span>
@@ -122,6 +192,46 @@
         </div>
       </article>
     `).join('');
+    const dialog = document.createElement('dialog');
+    dialog.className = 'reading-highlight-dialog';
+    dialog.setAttribute('aria-labelledby', 'reading-highlight-dialog-title');
+    dialog.innerHTML = `
+      <div class="reading-highlight-dialog-header">
+        <h2 id="reading-highlight-dialog-title">划线详情</h2>
+        <button type="button" class="reading-highlight-close" aria-label="关闭划线详情" autofocus>关闭 ×</button>
+      </div>
+      <div class="reading-highlight-dialog-meta"></div>
+      <blockquote class="reading-highlight-fulltext"></blockquote>
+    `;
+    document.querySelector('#reading-app').append(dialog);
+    dialog.querySelector('.reading-highlight-close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => {
+      const rect = dialog.getBoundingClientRect();
+      if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
+    });
+    // Let the dialog handle Escape without triggering the shelf's blur handler.
+    dialog.addEventListener('keydown', event => event.stopPropagation());
+    target.querySelectorAll('.reading-highlight').forEach((card, index) => {
+      const open = () => {
+        const item = highlights[index];
+        dialog.querySelector('.reading-highlight-dialog-meta').innerHTML = `
+          <strong>《${escapeHTML(item.bookTitle)}》</strong>
+          ${item.author ? `<span>作者：${escapeHTML(item.author)}</span>` : ''}
+          ${item.chapter ? `<span>章节：${escapeHTML(item.chapter)}</span>` : ''}
+          ${item.createTime ? `<time>划线日期：${formatDate(item.createTime)}</time>` : ''}
+        `;
+        dialog.querySelector('.reading-highlight-fulltext').textContent = item.text || '';
+        dialog.showModal();
+        dialog.scrollTop = 0;
+      };
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          open();
+        }
+      });
+    });
   };
 
   const setupHighlightScroller = () => {
@@ -137,7 +247,7 @@
     target.addEventListener('focusin', () => setPaused(true));
     target.addEventListener('focusout', () => setPaused(false));
     window.readingHighlightTimer = setInterval(() => {
-      if (paused) return;
+      if (paused || document.querySelector('.reading-highlight-dialog[open]')) return;
       index = (index + 1) % cards.length;
       target.scrollTo({
         top: index === 0 ? 0 : cards[index].offsetTop - target.offsetTop,
@@ -162,13 +272,40 @@
       renderStats(data);
       renderMonths(data);
       renderCategories(data);
+      let activeFilter = 'all';
       renderBooks(data);
+      renderTimeline(data);
+      window.readingShelfObserver?.disconnect();
+      let shelfWidth = document.querySelector('#reading-books').clientWidth;
+      window.readingShelfObserver = new ResizeObserver(entries => {
+        const width = Math.round(entries[0].contentRect.width);
+        if (Math.abs(width - shelfWidth) < 2) return;
+        shelfWidth = width;
+        renderBooks(data, activeFilter);
+      });
+      window.readingShelfObserver.observe(document.querySelector('#reading-books'));
+      app.addEventListener('click', event => {
+        if (!event.target.closest('.reading-book')) {
+          app.querySelectorAll('.reading-book-spine').forEach(button => button.setAttribute('aria-expanded', 'false'));
+        }
+      });
+      app.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          app.querySelectorAll('.reading-book-spine').forEach(button => button.setAttribute('aria-expanded', 'false'));
+          document.activeElement?.blur();
+        }
+      });
       renderHighlights(data);
       setupHighlightScroller();
       document.querySelector('#reading-empty').hidden = Boolean(hasData);
       document.querySelectorAll('[data-reading-filter]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.readingFilter === 'all'));
         button.addEventListener('click', () => {
-          document.querySelectorAll('[data-reading-filter]').forEach(item => item.classList.toggle('is-active', item === button));
+          document.querySelectorAll('[data-reading-filter]').forEach(item => {
+            item.classList.toggle('is-active', item === button);
+            item.setAttribute('aria-pressed', String(item === button));
+          });
+          activeFilter = button.dataset.readingFilter;
           renderBooks(data, button.dataset.readingFilter);
         });
       });
