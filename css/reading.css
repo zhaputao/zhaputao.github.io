@@ -410,7 +410,6 @@
 }
 
 .reading-highlight {
-  cursor: pointer;
   position: relative;
   padding: 16px 14px 14px 17px;
   background: rgba(255, 253, 248, 0.72);
@@ -461,93 +460,6 @@
 .reading-highlight-book {
   color: var(--reading-green-deep);
   font-weight: 700;
-}
-
-.reading-highlight:hover,
-.reading-highlight:focus-visible {
-  border-color: var(--reading-green);
-}
-
-.reading-highlight:focus-visible {
-  outline: 2px solid var(--reading-green);
-  outline-offset: -3px;
-}
-
-.reading-highlight-dialog {
-  box-sizing: border-box;
-  width: min(640px, calc(100vw - 32px));
-  max-height: 80vh;
-  max-height: 80dvh;
-  margin: auto;
-  padding: clamp(20px, 4vw, 32px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  color: var(--reading-ink);
-  background: var(--reading-card);
-  border: 1px solid var(--reading-line);
-  border-radius: 16px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, .25);
-}
-
-.reading-highlight-dialog::backdrop {
-  background: rgba(20, 28, 23, .55);
-}
-
-.reading-highlight-dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-#article-container .reading-highlight-dialog h2 {
-  margin: 0;
-  padding: 0;
-  color: var(--reading-ink);
-  font-size: 1.15rem;
-}
-
-.reading-highlight-close {
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 8px 14px;
-  color: var(--reading-green-deep);
-  background: transparent;
-  border: 1px solid var(--reading-line);
-  border-radius: 999px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.reading-highlight-close:focus-visible {
-  outline: 2px solid var(--reading-green);
-  outline-offset: 3px;
-}
-
-.reading-highlight-dialog-meta {
-  display: grid;
-  gap: 6px;
-  margin-top: 20px;
-  color: var(--reading-muted);
-  font-size: .8rem;
-  overflow-wrap: anywhere;
-}
-
-.reading-highlight-dialog-meta strong {
-  color: var(--reading-green-deep);
-}
-
-#article-container .reading-highlight-fulltext {
-  margin: 24px 0 0;
-  padding: 0;
-  color: var(--reading-ink);
-  background: transparent;
-  border: 0;
-  font-family: "Noto Serif SC", "Songti SC", serif;
-  font-size: 1rem;
-  line-height: 1.9;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }
 
 .reading-empty,

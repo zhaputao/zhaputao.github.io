@@ -184,7 +184,7 @@
       return;
     }
     target.innerHTML = highlights.map(item => `
-      <article class="reading-highlight" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看《${escapeHTML(item.bookTitle)}》划线全文" title="点击查看完整划线">
+      <article class="reading-highlight">
         <blockquote>${escapeHTML(item.text)}</blockquote>
         <div class="reading-highlight-meta">
           <span><span class="reading-highlight-book">《${escapeHTML(item.bookTitle)}》</span>${item.chapter ? ` · ${escapeHTML(item.chapter)}` : ''}</span>
@@ -192,46 +192,6 @@
         </div>
       </article>
     `).join('');
-    const dialog = document.createElement('dialog');
-    dialog.className = 'reading-highlight-dialog';
-    dialog.setAttribute('aria-labelledby', 'reading-highlight-dialog-title');
-    dialog.innerHTML = `
-      <div class="reading-highlight-dialog-header">
-        <h2 id="reading-highlight-dialog-title">划线详情</h2>
-        <button type="button" class="reading-highlight-close" aria-label="关闭划线详情" autofocus>关闭 ×</button>
-      </div>
-      <div class="reading-highlight-dialog-meta"></div>
-      <blockquote class="reading-highlight-fulltext"></blockquote>
-    `;
-    document.querySelector('#reading-app').append(dialog);
-    dialog.querySelector('.reading-highlight-close').addEventListener('click', () => dialog.close());
-    dialog.addEventListener('click', event => {
-      const rect = dialog.getBoundingClientRect();
-      if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
-    });
-    // Let the dialog handle Escape without triggering the shelf's blur handler.
-    dialog.addEventListener('keydown', event => event.stopPropagation());
-    target.querySelectorAll('.reading-highlight').forEach((card, index) => {
-      const open = () => {
-        const item = highlights[index];
-        dialog.querySelector('.reading-highlight-dialog-meta').innerHTML = `
-          <strong>《${escapeHTML(item.bookTitle)}》</strong>
-          ${item.author ? `<span>作者：${escapeHTML(item.author)}</span>` : ''}
-          ${item.chapter ? `<span>章节：${escapeHTML(item.chapter)}</span>` : ''}
-          ${item.createTime ? `<time>划线日期：${formatDate(item.createTime)}</time>` : ''}
-        `;
-        dialog.querySelector('.reading-highlight-fulltext').textContent = item.text || '';
-        dialog.showModal();
-        dialog.scrollTop = 0;
-      };
-      card.addEventListener('click', open);
-      card.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          open();
-        }
-      });
-    });
   };
 
   const setupHighlightScroller = () => {
@@ -247,7 +207,7 @@
     target.addEventListener('focusin', () => setPaused(true));
     target.addEventListener('focusout', () => setPaused(false));
     window.readingHighlightTimer = setInterval(() => {
-      if (paused || document.querySelector('.reading-highlight-dialog[open]')) return;
+      if (paused) return;
       index = (index + 1) % cards.length;
       target.scrollTo({
         top: index === 0 ? 0 : cards[index].offsetTop - target.offsetTop,
