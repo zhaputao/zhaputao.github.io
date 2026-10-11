@@ -494,10 +494,14 @@
 }
 
 .reading-highlight-dialog-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  background: var(--reading-card);
 }
 
 #article-container .reading-highlight-dialog h2 {
