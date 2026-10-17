@@ -100,6 +100,9 @@
       rows.push(`<div class="reading-shelf-row">${books.slice(offset, offset + perRow).map((book, index) => {
         const seed = [...String(book.bookId || book.title)].reduce((sum, c) => (sum * 31 + c.charCodeAt(0)) >>> 0, 0);
         const title = escapeHTML(book.title);
+        const readerLink = /^(https?:|weread:)/i.test(book.readerLink || '') ? book.readerLink : '';
+        const detailLink = /^(https?:|weread:)/i.test(book.deepLink || '') ? book.deepLink : '';
+        const bookLink = readerLink || detailLink;
         const status = book.kind === 'audio' ? '有声书' : book.status === 'finished' ? '已读完' : '正在读';
         return `<article class="reading-book${index >= perRow - 3 ? ' reading-book-end' : ''}" style="--spine-color:${palette[seed % palette.length]};--book-height:${142 + seed % 36}px">
           <button type="button" class="reading-book-spine" aria-label="查看《${title}》封面，${status}" aria-expanded="false">
@@ -107,7 +110,7 @@
           </button>
           <div class="reading-book-preview">
             <div class="reading-book-cover">${book.cover ? `<img src="${escapeHTML(book.cover)}" alt="${title}封面" loading="lazy">` : `<span class="reading-cover-fallback">${title}</span>`}</div>
-            <div class="reading-book-caption"><strong>${title}</strong><span>${escapeHTML(book.author || '佚名')} · ${status}</span>${book.deepLink && /^(https?:|weread:)/i.test(book.deepLink) ? `<a href="${escapeHTML(book.deepLink)}" rel="noopener">打开阅读 ↗</a>` : ''}</div>
+            <div class="reading-book-caption"><strong>${title}</strong><span>${escapeHTML(book.author || '佚名')} · ${status}</span>${bookLink ? `<a href="${escapeHTML(bookLink)}" rel="noopener">${readerLink ? '打开阅读' : '查看详情'} ↗</a>` : ''}</div>
           </div>
         </article>`;
       }).join('')}</div>`);
