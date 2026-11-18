@@ -269,7 +269,7 @@
       const data = await response.json();
       const hasData = data.generatedAt || data.books?.length || data.highlights?.length;
       document.querySelector('#reading-updated').textContent = data.generatedAt
-        ? `数据更新于 ${new Date(data.generatedAt).toLocaleString('zh-CN')}`
+        ? `数据更新于（北京时间）${new Date(data.generatedAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`
         : '等待第一次数据同步';
       document.querySelector('#reading-year').textContent = `${data.year || new Date().getFullYear()} · YEAR IN BOOKS`;
       renderStats(data);
